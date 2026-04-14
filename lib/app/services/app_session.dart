@@ -12,12 +12,12 @@ class AppSession {
   }
 
   static void set(String key, dynamic value) {
-  _box.write(key, value);
-}
+    _box.write(key, value);
+  }
 
-static dynamic get(String key) {
-  return _box.read(key);
-}
+  static dynamic get(String key) {
+    return _box.read(key);
+  }
 
   /// ---------------- TOKEN ----------------
 
@@ -46,6 +46,8 @@ static dynamic get(String key) {
   /// ---------------- CLEAR SESSION ----------------
 
   static void clear() {
-    _box.erase();
+    _box.remove(_tokenKey);
+    _box.remove(_snoKey);
+    _box.remove(_loginKey);
   }
 }

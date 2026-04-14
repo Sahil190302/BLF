@@ -4,7 +4,7 @@ import 'package:blf/app/services/home_api.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class HomeController extends GetxController {
+class HomeController extends GetxController with WidgetsBindingObserver {
   /// ───────────────── HEADER INFO ─────────────────
   var userName = ''.obs;
   var company = ''.obs;
@@ -27,6 +27,24 @@ class HomeController extends GetxController {
 
   /// 📝 ABSENT REASON
   TextEditingController absentReasonController = TextEditingController();
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      autoRefreshTimer?.cancel();
+    } else if (state == AppLifecycleState.resumed) {
+      startAutoRefresh();
+      refreshHome(); // ADD THIS
+    }
+  }
+
+  @override
+  void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    autoRefreshTimer?.cancel();
+    absentReasonController.dispose();
+    super.onClose();
+  }
 
   void controllerUpdateSlips(Map<String, dynamic> data) {
     slips[0]['displayValue'].value =
@@ -160,9 +178,7 @@ class HomeController extends GetxController {
       insideReferralCount.value = referralReceived;
       p2pMeetingCount.value = meetingTotal;
     } catch (e) {
-      Get.snackbar("Session Expired", "Please login again");
-      AppSession.clear();
-      Get.offAllNamed('/login');
+      debugPrint("API Error: $e");
     }
   }
 
@@ -195,13 +211,6 @@ class HomeController extends GetxController {
 
     /// optional: clear text
     // absentReasonController.clear();
-  }
-
-  @override
-  void onClose() {
-    autoRefreshTimer?.cancel();
-    absentReasonController.dispose();
-    super.onClose();
   }
 
   List<String> periods = ['3 Months', '6 Months', '12 Months'];
@@ -321,6 +330,8 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    WidgetsBinding.instance.addObserver(this); // ADD THIS
 
     loadHomeData().then((_) async {
       if (userSno.value.isNotEmpty) {

@@ -7,33 +7,32 @@ class ReferralApi {
       "https://bhartiyacoders.com/WEBSITE/YASH/blf_app_akshay/api/index.php";
 
   /// FETCH REFERRALS
-  static Future<List<Map<String, dynamic>>> fetchReferrals({
-    required String userId,
-  }) async {
-    try {
+  static Future<List<Map<String, dynamic>>> fetchReferralsByField({
+  required String field,
+  required String value,
+}) async {
+  try {
+    final response = await http.post(
+      Uri.parse(_url),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "action": "fetch",
+        "table": "referral",
+        "where": {field: value}
+      }),
+    ).timeout(const Duration(seconds: 15));
 
-      final response = await http.post(
-        Uri.parse(_url),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "action": "fetch",
-          "table": "referral",
-          "where": {"user_id": userId}
-        }),
-      ).timeout(const Duration(seconds: 15));
+    final data = jsonDecode(response.body);
 
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && data["status"] == true) {
-        return List<Map<String, dynamic>>.from(data["data"]);
-      } else {
-        throw Exception("Referral data not found");
-      }
-
-    } catch (e) {
-      throw Exception("Referral API error: $e");
+    if (response.statusCode == 200 && data["status"] == true) {
+      return List<Map<String, dynamic>>.from(data["data"]);
+    } else {
+      throw Exception("Referral data not found");
     }
+  } catch (e) {
+    throw Exception("Referral API error: $e");
   }
+}
 
   /// UPDATE REFERRAL
  static Future<void> updateReferral({

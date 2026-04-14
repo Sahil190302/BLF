@@ -34,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
 
     Timer(const Duration(seconds: 3), () {
-      if (AppSession.token != null) {
+     if (AppSession.isLoggedIn && AppSession.token != null) {
         Get.offAllNamed(Routes.BOTTOM_NAV);
       } else {
         Get.offAllNamed(Routes.LOGIN);
