@@ -234,18 +234,18 @@ class _ReferralDetailScreenState extends State<ReferralDetailScreen> {
                         ),
                       ),
 
-                      const SizedBox(width: 12),
+                      // const SizedBox(width: 12),
 
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _deleteReferral,
-                          icon: const Icon(Icons.delete),
-                          label: const Text("Delete Referral"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                          ),
-                        ),
-                      ),
+                      // Expanded(
+                      //   child: ElevatedButton.icon(
+                      //     onPressed: _deleteReferral,
+                      //     icon: const Icon(Icons.delete),
+                      //     label: const Text("Delete Referral"),
+                      //     style: ElevatedButton.styleFrom(
+                      //       backgroundColor: Colors.red,
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),

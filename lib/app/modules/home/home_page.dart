@@ -41,34 +41,33 @@ class HomeScreen extends StatelessWidget {
       drawer: const CustomDrawerWidget(),
 
       body: SafeArea(
-  child: RefreshIndicator(
-    onRefresh: controller.refreshHome,
-    child: SingleChildScrollView(
-     
-          physics: BouncingScrollPhysics(),
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              HomeHeaderSection(controller: controller),
-              const SizedBox(height: 10),
-              UpcomingEventsSection(events: controller.upcomingEvents),
+        child: RefreshIndicator(
+          onRefresh: controller.refreshHome,
+          child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                HomeHeaderSection(controller: controller),
+                const SizedBox(height: 10),
+                UpcomingEventsSection(events: controller.upcomingEvents),
 
-              const SizedBox(height: 20),
-              ThisWeeksSlipsSection(controller: controller),
-              const SizedBox(height: 10),
-              TimePeriodSection(controller: controller),
-              const SizedBox(height: 20),
-              NextMeetingSection(controller: controller),
-              const SizedBox(height: 20),
-              QuickActionsSection(),
-              const SizedBox(height: 20),
-              const WebsiteFooter(),
-            ],
+                const SizedBox(height: 20),
+                ThisWeeksSlipsSection(controller: controller),
+                const SizedBox(height: 10),
+                TimePeriodSection(controller: controller),
+                const SizedBox(height: 20),
+                NextMeetingSection(controller: controller),
+                const SizedBox(height: 20),
+                QuickActionsSection(),
+                const SizedBox(height: 20),
+                const WebsiteFooter(),
+              ],
+            ),
           ),
         ),
       ),
-    )
     );
   }
 }

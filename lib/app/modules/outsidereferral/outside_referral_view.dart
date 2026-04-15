@@ -268,116 +268,169 @@ class OutsideReferralView extends StatelessWidget {
   }
 
   void _openPeopleBottomSheet(BuildContext context) {
-    List<String> tempSelected = List.from(controller.selectedPersons);
-    List<Map<String, dynamic>> tempFiltered = List.from(controller.users);
+    final RxList<String> tempSelected = List<String>.from(
+      controller.selectedPersons,
+    ).obs;
 
-    TextEditingController searchCtrl = TextEditingController();
+    final RxList<Map<String, dynamic>> tempFiltered =
+        List<Map<String, dynamic>>.from(controller.users).obs;
 
-    Get.dialog(
-      Dialog(
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: StatefulBuilder(
-          builder: (context, setState) {
-            return Container(
-              padding: const EdgeInsets.all(12),
-              height: 600,
+    final TextEditingController searchCtrl = TextEditingController();
+    final RxBool isProcessing = false.obs;
 
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Select People",
-                    style: GoogleFonts.kumbhSans(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+    Get.bottomSheet(
+      Container(
+        height: MediaQuery.of(context).size.height * 0.9,
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            /// HANDLE
+            Container(
+              width: 40,
+              height: 5,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            /// TITLE
+            Text(
+              "Select People",
+              style: GoogleFonts.kumbhSans(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            /// SEARCH
+            TextField(
+              controller: searchCtrl,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: "Search person",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onChanged: (val) {
+                tempFiltered.assignAll(
+                  controller.users.where(
+                    (u) => u['name'].toString().toLowerCase().contains(
+                      val.toLowerCase(),
                     ),
                   ),
+                );
+              },
+            ),
 
-                  const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-                  TextField(
-                    controller: searchCtrl,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
-                      hintText: "Search person",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onChanged: (val) {
-                      setState(() {
-                        tempFiltered = controller.users
-                            .where(
-                              (u) => u['name']
-                                  .toString()
-                                  .toLowerCase()
-                                  .contains(val.toLowerCase()),
-                            )
-                            .toList();
-                      });
-                    },
-                  ),
+            /// LIST
+            Expanded(
+              child: Obx(() {
+                if (tempFiltered.isEmpty) {
+                  return const Center(child: Text("No users found"));
+                }
 
-                  const SizedBox(height: 12),
+                return ListView.builder(
+                  itemCount: tempFiltered.length,
+                  itemBuilder: (_, index) {
+                    final user = tempFiltered[index];
+                    final name = user['name'].toString();
 
-                  Expanded(
-                    child: tempFiltered.isEmpty
-                        ? const Center(child: Text("No users found"))
-                        : ListView.builder(
-                            itemCount: tempFiltered.length,
-                            itemBuilder: (_, index) {
-                              final user = tempFiltered[index];
-                              final name = user['name'].toString();
+                    final isSelected = tempSelected.contains(name);
+                    return Obx(() {
+                      final isSelected = tempSelected.contains(name);
 
-                              bool isSelected = tempSelected.contains(name);
-
-                              return ListTile(
-                                leading: Icon(
+                      return InkWell(
+                        onTap: () {
+                          if (isSelected) {
+                            tempSelected.remove(name);
+                          } else {
+                            tempSelected.add(name);
+                          }
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.primary.withOpacity(0.12)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            children: [
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 150),
+                                child: Icon(
                                   isSelected
                                       ? Icons.check_box
                                       : Icons.check_box_outline_blank,
+                                  key: ValueKey(isSelected),
                                   color: AppColors.primaryDark,
                                 ),
-
-                                title: Text(name),
-
-                                onTap: () {
-                                  setState(() {
-                                    if (isSelected) {
-                                      tempSelected.remove(name);
-                                    } else {
-                                      tempSelected.add(name);
-                                    }
-                                  });
-                                },
-                              );
-                            },
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  name,
+                                  style: GoogleFonts.kumbhSans(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                  ),
+                        ),
+                      );
+                    });
+                  },
+                );
+              }),
+            ),
 
-                  const SizedBox(height: 10),
+            const SizedBox(height: 10),
 
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        controller.selectedPersons.assignAll(tempSelected);
+            /// DONE BUTTON (FIXED + SAFE)
+            Obx(
+              () => SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: isProcessing.value
+                      ? null
+                      : () {
+                          isProcessing.value = true;
 
-                        Future.microtask(() {
-                          Navigator.of(context).pop();
-                        });
-                      },
+                          controller.selectedPersons.assignAll(tempSelected);
 
-                      child: const Text("Done"),
-                    ),
-                  ),
-                ],
+                          Get.back(); // instant close, no microtask
+                        },
+                  child: isProcessing.value
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text("Done"),
+                ),
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
+      isScrollControlled: true,
     );
   }
 }

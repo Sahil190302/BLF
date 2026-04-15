@@ -17,6 +17,7 @@ class FeedbackController extends GetxController {
 
   var selectedPerson = "".obs;
   var selectedMemberId = 0.obs;
+  var isSubmitting = false.obs;
 
   int currentUserId = 0;
 
@@ -54,7 +55,8 @@ class FeedbackController extends GetxController {
   }
 
   Future<void> submitTestimonial() async {
-    if (selectedMemberId.value == 0 || testimonialCtrl.text.trim().isEmpty) {
+    if (selectedMemberId.value == 0 ||
+        testimonialCtrl.text.trim().isEmpty) {
       final context = Get.context;
       if (context != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -67,12 +69,16 @@ class FeedbackController extends GetxController {
       return;
     }
 
+    isSubmitting.value = true;
+
     try {
       bool success = await FeedbackApi.submitFeedback(
         userId: currentUserId,
         memberId: selectedMemberId.value,
         message: testimonialCtrl.text.trim(),
       );
+
+      isSubmitting.value = false;
 
       final context = Get.context;
 
@@ -100,6 +106,8 @@ class FeedbackController extends GetxController {
         }
       }
     } catch (e) {
+      isSubmitting.value = false;
+
       final context = Get.context;
 
       if (context != null) {
@@ -127,41 +135,55 @@ class FeedbackPage extends StatelessWidget {
         title: "Testimonials & Feedback",
         showBackButton: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Write a Testimonial",
-              style: GoogleFonts.kumbhSans(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primaryDark,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Write a Testimonial",
+                  style: GoogleFonts.kumbhSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryDark,
+                  ),
+                ),
+                const SizedBox(height: 15),
+
+                _label("Member Name"),
+                _memberSelector(context),
+
+                _label("Your Testimonial"),
+
+                CustomTextField(
+                  hint: "Write your testimonial here...",
+                  controller: controller.testimonialCtrl,
+                  maxLines: 5,
+                ),
+
+                const SizedBox(height: 25),
+
+                CustomButton(
+                  text: "Submit Testimonial",
+                  onTap: controller.submitTestimonial,
+                ),
+              ],
+            ),
+          ),
+
+          Obx(() {
+            if (!controller.isSubmitting.value) return const SizedBox();
+
+            return Container(
+              color: Colors.black.withOpacity(0.4),
+              child: const Center(
+                child: CircularProgressIndicator(),
               ),
-            ),
-
-            const SizedBox(height: 15),
-
-            _label("Member Name"),
-            _memberSelector(context),
-
-            _label("Your Testimonial"),
-
-            CustomTextField(
-              hint: "Write your testimonial here...",
-              controller: controller.testimonialCtrl,
-              maxLines: 5,
-            ),
-
-            const SizedBox(height: 25),
-
-            CustomButton(
-              text: "Submit Testimonial",
-              onTap: controller.submitTestimonial,
-            ),
-          ],
-        ),
+            );
+          }),
+        ],
       ),
     );
   }
@@ -214,7 +236,6 @@ class FeedbackPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-
               const SizedBox(height: 15),
 
               Text(
@@ -224,7 +245,6 @@ class FeedbackPage extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-
               const SizedBox(height: 15),
 
               TextField(
@@ -237,7 +257,6 @@ class FeedbackPage extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(height: 15),
 
               Expanded(
@@ -250,9 +269,8 @@ class FeedbackPage extends StatelessWidget {
                     return GestureDetector(
                       onTap: () {
                         controller.selectedPerson.value = name;
-                        controller.selectedMemberId.value = int.parse(
-                          user["sno"].toString(),
-                        );
+                        controller.selectedMemberId.value =
+                            int.parse(user["sno"].toString());
 
                         Get.back();
                       },

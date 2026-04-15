@@ -35,9 +35,9 @@ class TestimonialDetailsPage extends StatelessWidget {
 
             _displayToggle(),
 
-            const SizedBox(height: 10),
+            // const SizedBox(height: 10),
 
-            _deleteButton(),
+            // _deleteButton(),
           ],
         ),
       ),

@@ -19,7 +19,7 @@ class BottomNavPage extends StatelessWidget {
   Widget _getCurrentPage() {
     switch (controller.selectedIndex.value) {
       case 0:
-        return HomeScreen(scaffoldKey: _scaffoldKey); // Pass the scaffold key
+        return HomeScreen(scaffoldKey: _scaffoldKey);
       case 1:
         return TestimonialsPage();
       case 2:
@@ -45,14 +45,19 @@ class BottomNavPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() => _getCurrentPage()),
-      bottomNavigationBar: Obx(() => _buildCustomNavBar()),
+
+      /// FIX: SafeArea added
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Obx(() => _buildCustomNavBar()),
+      ),
     );
   }
 
   Widget _buildCustomNavBar() {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white, // White background
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
@@ -61,13 +66,16 @@ class BottomNavPage extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(navItems.length, (index) {
-          final item = navItems[index];
-          final isSelected = controller.selectedIndex.value == index;
-          return _buildNavItem(item, isSelected, index);
-        }),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 6), // FIX: spacing for old devices
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: List.generate(navItems.length, (index) {
+            final item = navItems[index];
+            final isSelected = controller.selectedIndex.value == index;
+            return _buildNavItem(item, isSelected, index);
+          }),
+        ),
       ),
     );
   }
@@ -78,7 +86,10 @@ class BottomNavPage extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(
+            vertical: 8,
+            horizontal: 6,
+          ), // FIX: better spacing
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -87,14 +98,13 @@ class BottomNavPage extends StatelessWidget {
                 size: 25,
                 color: isSelected ? AppColors.primary : Colors.black,
               ),
-
               const SizedBox(height: 2),
-
               Text(
                 item.label,
                 style: GoogleFonts.kumbhSans(
                   fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                  fontWeight:
+                      isSelected ? FontWeight.w700 : FontWeight.w400,
                   color: isSelected ? AppColors.primary : Colors.black,
                 ),
               ),
@@ -106,7 +116,6 @@ class BottomNavPage extends StatelessWidget {
   }
 }
 
-/// NavItem class
 class NavItem {
   final IconData icon;
   final String label;
