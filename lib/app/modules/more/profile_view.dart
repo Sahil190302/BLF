@@ -12,6 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:blf/widgets/custom_appbar.dart';
 import '../../../../utils/app_colors.dart';
 import 'profile_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
@@ -113,6 +114,7 @@ class ProfileView extends GetView<ProfileController> {
                                   ),
                           ),
                         ),
+                        const SizedBox(height: 12),
 
                         /// VERIFIED BADGE
                         Positioned(
@@ -192,6 +194,56 @@ class ProfileView extends GetView<ProfileController> {
                       ),
                     ),
 
+                    /// DELETE ACCOUNT BUTTON
+                    GestureDetector(
+                      onTap: () {
+                        // open URL
+                        launchUrl(
+                          Uri.parse(
+                            "https://blf.co.in/appsinfo/dataremoveurl.php",
+                          ),
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Colors.red.shade400, Colors.red.shade700],
+                          ),
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.red.withOpacity(0.3),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(
+                              Icons.delete_outline,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              "Delete Account",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
                     // const SizedBox(height: 5),
 
                     // // DUE DATE
@@ -206,6 +258,7 @@ class ProfileView extends GetView<ProfileController> {
                   ],
                 ),
               ),
+
               const SizedBox(height: 20),
 
               /// --------------------------------------------------------
@@ -275,51 +328,6 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  // --------------------------------------------------------------------
-  // REUSABLE INFO ROW
-  // --------------------------------------------------------------------
-  Widget _infoRow(String title, String value, IconData icon) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.primaryDark.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: AppColors.primaryDark, size: 20),
-        ),
-        const SizedBox(width: 12),
-
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.kumbhSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textLight,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                value,
-                style: GoogleFonts.kumbhSans(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.black,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  // --------------------------------------------------------------------
   // PRIMARY BUTTON
   // --------------------------------------------------------------------
   Widget _primaryButton(String text, IconData icon, VoidCallback onTap) {
