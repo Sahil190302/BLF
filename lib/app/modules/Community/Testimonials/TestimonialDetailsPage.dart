@@ -168,42 +168,4 @@ class TestimonialDetailsPage extends StatelessWidget {
   // ------------------------------------------------------
   // DELETE BUTTON
   // ------------------------------------------------------
-  Widget _deleteButton() {
-    return GestureDetector(
-      onTap: () {
-        Get.defaultDialog(
-          title: "Delete Testimonial?",
-          middleText: "Are you sure you want to delete this testimonial?",
-          textConfirm: "Delete",
-          confirmTextColor: Colors.white,
-          onConfirm: () async {
-            final int id = data["sno"]; // RECEIVED API sno
-
-            final success = await TestimonialsApi.deleteTestimonial(id);
-
-            Get.back(); // close dialog
-
-            if (success) {
-              Get.back(result: true); // go back to list
-            }
-          },
-          textCancel: "Cancel",
-        );
-      },
-      child: Row(
-        children: [
-          Icon(Icons.delete, color: Colors.red),
-          const SizedBox(width: 8),
-          Text(
-            "Delete Testimonial",
-            style: GoogleFonts.kumbhSans(
-              fontSize: 15,
-              color: Colors.red,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
