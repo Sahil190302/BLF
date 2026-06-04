@@ -199,9 +199,9 @@ class OneToOneMeetingView extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                controller.selectedPersons.isEmpty
+                controller.selectedPerson.value.isEmpty
                     ? "Select Person"
-                    : controller.selectedPersons.join(", "),
+                    : controller.selectedPerson.value,
                 style: GoogleFonts.kumbhSans(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -278,15 +278,13 @@ class OneToOneMeetingView extends StatelessWidget {
   }
 
   void _openMetWithBottomSheet(BuildContext context) {
-    final RxList<String> tempSelected = List<String>.from(
-      controller.selectedPersons,
-    ).obs;
-
     final RxList<Map<String, dynamic>> tempFiltered =
         List<Map<String, dynamic>>.from(controller.users).obs;
 
     final TextEditingController searchCtrl = TextEditingController();
-    final RxBool isProcessing = false.obs;
+
+    searchCtrl.clear();
+    tempFiltered.assignAll(controller.users);
 
     Get.bottomSheet(
       Container(
@@ -298,7 +296,6 @@ class OneToOneMeetingView extends StatelessWidget {
         ),
         child: Column(
           children: [
-            /// HANDLE
             Container(
               width: 40,
               height: 5,
@@ -310,9 +307,8 @@ class OneToOneMeetingView extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            /// TITLE
             Text(
-              "Select People",
+              "Select Person",
               style: GoogleFonts.kumbhSans(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -321,7 +317,6 @@ class OneToOneMeetingView extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            /// SEARCH
             TextField(
               controller: searchCtrl,
               decoration: InputDecoration(
@@ -344,7 +339,6 @@ class OneToOneMeetingView extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            /// LIST
             Expanded(
               child: Obx(() {
                 if (tempFiltered.isEmpty) {
@@ -358,15 +352,13 @@ class OneToOneMeetingView extends StatelessWidget {
                     final name = user['name'].toString();
 
                     return Obx(() {
-                      final isSelected = tempSelected.contains(name);
+                      final isSelected =
+                          controller.selectedPerson.value == name;
 
                       return InkWell(
                         onTap: () {
-                          if (isSelected) {
-                            tempSelected.remove(name);
-                          } else {
-                            tempSelected.add(name);
-                          }
+                          Navigator.of(context).pop();
+                          controller.selectedPerson.value = name;
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 150),
@@ -380,15 +372,11 @@ class OneToOneMeetingView extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
-                              AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 150),
-                                child: Icon(
-                                  isSelected
-                                      ? Icons.check_box
-                                      : Icons.check_box_outline_blank,
-                                  key: ValueKey(isSelected),
-                                  color: AppColors.primaryDark,
-                                ),
+                              Icon(
+                                isSelected
+                                    ? Icons.check_circle
+                                    : Icons.radio_button_unchecked,
+                                color: AppColors.primaryDark,
                               ),
                               const SizedBox(width: 10),
                               Expanded(
@@ -408,31 +396,6 @@ class OneToOneMeetingView extends StatelessWidget {
                   },
                 );
               }),
-            ),
-
-            const SizedBox(height: 10),
-
-            /// DONE BUTTON
-            Obx(
-              () => SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: isProcessing.value
-                      ? null
-                      : () {
-                          isProcessing.value = true;
-                          controller.selectedPersons.assignAll(tempSelected);
-                          Get.back(); // immediate close
-                        },
-                  child: isProcessing.value
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text("Done"),
-                ),
-              ),
             ),
           ],
         ),

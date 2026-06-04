@@ -1,3 +1,4 @@
+import 'package:blf/app/modules/bottombar/bottom_nav_page.dart';
 import 'package:blf/app/services/app_session.dart';
 import 'package:blf/app/services/home_api.dart';
 import 'package:blf/app/services/repo/app_repo.dart';
@@ -49,7 +50,7 @@ class OutsideReferralController extends GetxController {
     }
   }
 
-  RxList<String> selectedPersons = <String>[].obs;
+  RxString selectedPerson = ''.obs;
 
   final List<String> statusList = ["Told Them You Will You", "Given Your Card"];
 
@@ -86,7 +87,7 @@ class OutsideReferralController extends GetxController {
   Future<void> submitOutsideReferral() async {
     print("STEP 1 → Confirm clicked");
 
-    if (selectedPersons.isEmpty ||
+    if (selectedPerson.value.isEmpty ||
         selectedStatus.value.isEmpty ||
         comment.value.trim().isEmpty) {
       AppSnackbar.error(
@@ -107,7 +108,7 @@ class OutsideReferralController extends GetxController {
       if (userSno == null) throw Exception("Session expired");
 
       List<int> referralUserIds = users
-          .where((u) => selectedPersons.contains(u['name']))
+          .where((u) => u['name'] == selectedPerson.value)
           .map<int>((u) => int.parse(u['sno'].toString()))
           .toList();
 
@@ -130,24 +131,8 @@ class OutsideReferralController extends GetxController {
 
       AppLoader.hide();
 
-      await Future.delayed(const Duration(milliseconds: 150));
-
-      final context = Get.context;
-
-      if (context != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response != null && response["status"] == true
-                  ? "Referral Confirmed Successfully"
-                  : "Referral submission failed",
-            ),
-          ),
-        );
-      }
-
       if (response != null && response["status"] == true) {
-        selectedPersons.clear();
+        selectedPerson.value = "";
         selectedStatus.value = "";
         phone.clear();
         email.clear();
@@ -156,25 +141,25 @@ class OutsideReferralController extends GetxController {
         hotLevel.value = 5.0;
         referralType.value = "Outside";
 
-        Future.delayed(const Duration(milliseconds: 250), () {
-          Get.snackbar(
-            "Success",
-            "Referral Confirmed Successfully",
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
-          );
+        Get.snackbar(
+          "Success",
+          "Referral Confirmed Successfully",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        Future.delayed(const Duration(milliseconds: 500), () {
+          Get.offAll(() => BottomNavPage());
         });
       } else {
-        Future.delayed(const Duration(milliseconds: 250), () {
-          Get.snackbar(
-            "Error",
-            "Referral submission failed",
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
-        });
+        Get.snackbar(
+          "Error",
+          "Referral submission failed",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } catch (e, stack) {
       print("ERROR → $e");

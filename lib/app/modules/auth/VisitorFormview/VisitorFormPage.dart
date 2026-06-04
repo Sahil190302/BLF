@@ -18,17 +18,13 @@ class VisitorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: CustomAppBar(
-        title: "Visitor Form",
-        showBackButton: true,
-      ),
+      appBar: CustomAppBar(title: "Visitor Form", showBackButton: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(12),
         physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             _label("Name"),
             CustomTextField(
               hint: "Enter your full name",
@@ -89,18 +85,20 @@ class VisitorView extends StatelessWidget {
               controller.isOtherGroupMemberBool,
             ),
 
-            Obx(() => controller.isOtherGroupMemberBool.value
-                ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _label("Other Group Name"),
-                CustomTextField(
-                  hint: "Enter group name",
-                  controller: controller.otherGroupNameCtrl,
-                ),
-              ],
-            )
-                : const SizedBox()),
+            Obx(
+              () => controller.isOtherGroupMemberBool.value
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _label("Other Group Name"),
+                        CustomTextField(
+                          hint: "Enter group name",
+                          controller: controller.otherGroupNameCtrl,
+                        ),
+                      ],
+                    )
+                  : const SizedBox(),
+            ),
 
             _label("Referral Code of the member who is inviting you"),
             CustomTextField(
@@ -113,7 +111,7 @@ class VisitorView extends StatelessWidget {
 
             _infoText(
               "Please scan the QR code for visitor meeting contribution "
-                  "and pay ₹1200/-",
+              "and pay ₹1200/-",
             ),
 
             // QR CODE
@@ -130,12 +128,14 @@ class VisitorView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey),
               ),
-              child: Image.network(
-                "https://img.freepik.com/premium-vector/vector-qr-code-example-smartphone-scan_535345-3786.jpg?semt=ais_hybrid&w=740&q=80", // YOUR QR IMAGE
-                fit: BoxFit.contain,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  "assets/Payment_Qr.jpeg",
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-
             _sectionTitle("Upload Payment Screenshot (After Payment)"),
 
             _uploadBox(),
@@ -187,10 +187,7 @@ class VisitorView extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Text(
         text,
-        style: GoogleFonts.kumbhSans(
-          fontSize: 14,
-          color: Colors.grey[700],
-        ),
+        style: GoogleFonts.kumbhSans(fontSize: 14, color: Colors.grey[700]),
       ),
     );
   }
@@ -207,37 +204,36 @@ class VisitorView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        Obx(() => Row(
-          children: ["Yes", "No"].map((e) {
-            bool selected =
-                (e == "Yes" && value.value) ||
-                    (e == "No" && !value.value);
-            return GestureDetector(
-              onTap: () => value.value = e == "Yes",
-              child: Container(
-                margin: const EdgeInsets.only(right: 12),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 18, vertical: 10),
-                decoration: BoxDecoration(
-                  color: selected
-                      ? AppColors.primaryDark
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.green),
-                ),
-                child: Text(
-                  e,
-                  style: GoogleFonts.kumbhSans(
-                    color: selected
-                        ? Colors.white
-                        : AppColors.black,
-                    fontWeight: FontWeight.w600,
+        Obx(
+          () => Row(
+            children: ["Yes", "No"].map((e) {
+              bool selected =
+                  (e == "Yes" && value.value) || (e == "No" && !value.value);
+              return GestureDetector(
+                onTap: () => value.value = e == "Yes",
+                child: Container(
+                  margin: const EdgeInsets.only(right: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: selected ? AppColors.primaryDark : Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.green),
+                  ),
+                  child: Text(
+                    e,
+                    style: GoogleFonts.kumbhSans(
+                      color: selected ? Colors.white : AppColors.black,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-            );
-          }).toList(),
-        )),
+              );
+            }).toList(),
+          ),
+        ),
         const SizedBox(height: 12),
       ],
     );
@@ -253,19 +249,18 @@ class VisitorView extends StatelessWidget {
           border: Border.all(color: AppColors.primaryDark),
         ),
         child: Center(
-          child: Obx(() => controller.paymentImage.value == null
-              ? Text(
-            "Upload Payment Screenshot\n(Max 10MB, Image Only)",
-            textAlign: TextAlign.center,
-            style:
-            GoogleFonts.kumbhSans(color: Colors.grey),
-          )
-              : Text(
-            "Payment Image Selected",
-            style: GoogleFonts.kumbhSans(
-
-                color: AppColors.primaryDark),
-          )),
+          child: Obx(
+            () => controller.paymentImage.value == null
+                ? Text(
+                    "Upload Payment Screenshot\n(Max 10MB, Image Only)",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.kumbhSans(color: Colors.grey),
+                  )
+                : Text(
+                    "Payment Image Selected",
+                    style: GoogleFonts.kumbhSans(color: AppColors.primaryDark),
+                  ),
+          ),
         ),
       ),
     );

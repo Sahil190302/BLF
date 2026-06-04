@@ -1,7 +1,6 @@
 import 'app_snackbar.dart';
 
 class AppValidator {
-
   // 🔹 Required Field
   static bool required(String value, String field) {
     if (value.trim().isEmpty) {
@@ -15,29 +14,28 @@ class AppValidator {
   static bool email(String value) {
     value = value.trim();
 
-    if (!required(value, "Email")) return false;
-
-    final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-    if (!regex.hasMatch(value)) {
-      AppSnackbar.error("Enter valid email");
+    if (value.isEmpty) {
       return false;
     }
-    return true;
+
+    final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+
+    return regex.hasMatch(value);
   }
 
   // 🔹 Phone Validation
   static bool phone(String value, {int length = 10}) {
     value = value.trim();
 
-    if (!required(value, "Phone")) return false;
+    if (value.isEmpty) {
+      return false;
+    }
 
     if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-      AppSnackbar.error("Phone must be numeric");
       return false;
     }
 
     if (value.length != length) {
-      AppSnackbar.error("Phone must be $length digits");
       return false;
     }
 
@@ -48,10 +46,11 @@ class AppValidator {
   static bool password(String value, {int minLength = 2}) {
     value = value.trim();
 
-    if (!required(value, "Password")) return false;
+    if (value.isEmpty) {
+      return false;
+    }
 
     if (value.length < minLength) {
-      AppSnackbar.error("Password must be at least $minLength characters");
       return false;
     }
 
@@ -62,15 +61,15 @@ class AppValidator {
   static bool otp(String value, {int length = 4}) {
     value = value.trim();
 
-    if (!required(value, "OTP")) return false;
+    if (value.isEmpty) {
+      return false;
+    }
 
     if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-      AppSnackbar.error("OTP must be numeric");
       return false;
     }
 
     if (value.length != length) {
-      AppSnackbar.error("Please enter valid $length-digit OTP");
       return false;
     }
 

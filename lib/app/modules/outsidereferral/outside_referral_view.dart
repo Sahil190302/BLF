@@ -76,6 +76,15 @@ class OutsideReferralView extends StatelessWidget {
 
             const SizedBox(height: 20),
 
+            /// NAME
+            _buildLabel("Name"),
+            CustomTextField(
+              hint: "Enter Name",
+              controller: controller.address,
+              icon: Icons.person,
+            ),
+            const SizedBox(height: 20),
+
             /// PHONE
             _buildLabel("Telephone"),
             CustomTextField(
@@ -91,16 +100,6 @@ class OutsideReferralView extends StatelessWidget {
               hint: "Enter Email",
               controller: controller.email,
               icon: Icons.email,
-            ),
-            const SizedBox(height: 20),
-
-            /// ADDRESS
-            _buildLabel("Address"),
-            CustomTextField(
-              hint: "Enter Address",
-              controller: controller.address,
-              maxLines: 1,
-              icon: Icons.location_on,
             ),
             const SizedBox(height: 20),
 
@@ -179,9 +178,9 @@ class OutsideReferralView extends StatelessWidget {
 
               const SizedBox(height: 4),
               Text(
-                controller.selectedPersons.isEmpty
+                controller.selectedPerson.value.isEmpty
                     ? "Select Person"
-                    : controller.selectedPersons.join(", "),
+                    : controller.selectedPerson.value,
                 style: GoogleFonts.kumbhSans(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -268,15 +267,13 @@ class OutsideReferralView extends StatelessWidget {
   }
 
   void _openPeopleBottomSheet(BuildContext context) {
-    final RxList<String> tempSelected = List<String>.from(
-      controller.selectedPersons,
-    ).obs;
-
     final RxList<Map<String, dynamic>> tempFiltered =
         List<Map<String, dynamic>>.from(controller.users).obs;
 
     final TextEditingController searchCtrl = TextEditingController();
-    final RxBool isProcessing = false.obs;
+
+    searchCtrl.clear();
+    tempFiltered.assignAll(controller.users);
 
     Get.bottomSheet(
       Container(
@@ -288,7 +285,6 @@ class OutsideReferralView extends StatelessWidget {
         ),
         child: Column(
           children: [
-            /// HANDLE
             Container(
               width: 40,
               height: 5,
@@ -300,9 +296,8 @@ class OutsideReferralView extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            /// TITLE
             Text(
-              "Select People",
+              "Select Person",
               style: GoogleFonts.kumbhSans(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -311,7 +306,6 @@ class OutsideReferralView extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            /// SEARCH
             TextField(
               controller: searchCtrl,
               decoration: InputDecoration(
@@ -334,7 +328,6 @@ class OutsideReferralView extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            /// LIST
             Expanded(
               child: Obx(() {
                 if (tempFiltered.isEmpty) {
@@ -347,17 +340,17 @@ class OutsideReferralView extends StatelessWidget {
                     final user = tempFiltered[index];
                     final name = user['name'].toString();
 
-                    final isSelected = tempSelected.contains(name);
                     return Obx(() {
-                      final isSelected = tempSelected.contains(name);
+                      final isSelected =
+                          controller.selectedPerson.value == name;
 
                       return InkWell(
                         onTap: () {
-                          if (isSelected) {
-                            tempSelected.remove(name);
-                          } else {
-                            tempSelected.add(name);
-                          }
+                          controller.selectedPerson.value = name;
+
+                          Future.microtask(() {
+                            Navigator.of(context).pop();
+                          });
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 150),
@@ -371,15 +364,11 @@ class OutsideReferralView extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
-                              AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 150),
-                                child: Icon(
-                                  isSelected
-                                      ? Icons.check_box
-                                      : Icons.check_box_outline_blank,
-                                  key: ValueKey(isSelected),
-                                  color: AppColors.primaryDark,
-                                ),
+                              Icon(
+                                isSelected
+                                    ? Icons.check_circle
+                                    : Icons.radio_button_unchecked,
+                                color: AppColors.primaryDark,
                               ),
                               const SizedBox(width: 10),
                               Expanded(
@@ -399,33 +388,6 @@ class OutsideReferralView extends StatelessWidget {
                   },
                 );
               }),
-            ),
-
-            const SizedBox(height: 10),
-
-            /// DONE BUTTON (FIXED + SAFE)
-            Obx(
-              () => SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: isProcessing.value
-                      ? null
-                      : () {
-                          isProcessing.value = true;
-
-                          controller.selectedPersons.assignAll(tempSelected);
-
-                          Get.back(); // instant close, no microtask
-                        },
-                  child: isProcessing.value
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text("Done"),
-                ),
-              ),
             ),
           ],
         ),

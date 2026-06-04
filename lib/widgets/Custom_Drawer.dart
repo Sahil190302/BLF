@@ -221,20 +221,28 @@ class CustomDrawer extends StatelessWidget {
             Row(
               children: [
                 // User avatar
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                    image: userImageUrl != null
-                        ? DecorationImage(
-                            image: NetworkImage(userImageUrl!),
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.white,
+                  child: ClipOval(
+                    child: userImageUrl != null && userImageUrl!.isNotEmpty
+                        ? Image.network(
+                            userImageUrl!,
+                            width: 60,
+                            height: 60,
                             fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.person,
+                                size: 35,
+                                color: AppColors.primary,
+                              );
+                            },
                           )
-                        : const DecorationImage(
-                            image: AssetImage('assets/default_avatar.png'),
-                            fit: BoxFit.cover,
+                        : Icon(
+                            Icons.person,
+                            size: 35,
+                            color: AppColors.primary,
                           ),
                   ),
                 ),

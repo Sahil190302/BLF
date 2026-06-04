@@ -1,3 +1,4 @@
+import 'package:blf/app/modules/bottombar/bottom_nav_page.dart';
 import 'package:blf/app/services/app_session.dart';
 import 'package:blf/app/services/home_api.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,8 +8,6 @@ import 'package:get/get.dart';
 import '../../../utils/app_loader.dart';
 import '../../../utils/app_snackbar.dart';
 import '../../../utils/app_validation.dart';
-import '../../services/api_exception.dart';
-import '../../services/repo/app_repo.dart';
 
 class TyfcbController extends GetxController {
   /// TEXT CONTROLLERS
@@ -25,7 +24,7 @@ class TyfcbController extends GetxController {
   var receiverApproved = false.obs;
 
   /// MULTIPLE PEOPLE SELECTION (Names)
-  RxList<String> selectedPersons = <String>[].obs;
+  RxString selectedPerson = ''.obs;
 
   /// USERS FROM API
   RxList<Map<String, dynamic>> users = <Map<String, dynamic>>[].obs;
@@ -87,9 +86,9 @@ class TyfcbController extends GetxController {
     print("STEP 1 → Submit clicked");
 
     try {
-      if (selectedPersons.isEmpty) {
-        print("STEP 2 → No persons selected");
-        throw Exception("Please select at least one person");
+      if (selectedPerson.value.isEmpty) {
+        print("STEP 2 → No person selected");
+        throw Exception("Please select a person");
       }
 
       print("STEP 3 → Persons selected");
@@ -119,7 +118,7 @@ class TyfcbController extends GetxController {
       }
 
       List<int> givenUserIds = users
-          .where((u) => selectedPersons.contains(u['name']))
+          .where((u) => u['name'] == selectedPerson.value)
           .map<int>((u) => int.parse(u['sno'].toString()))
           .toList();
 
@@ -143,12 +142,13 @@ class TyfcbController extends GetxController {
       AppLoader.hide();
 
       Future.delayed(const Duration(milliseconds: 250), () {
-        final context = Get.context;
-        if (context != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Acknowledgement submitted successfully")),
-          );
-        }
+        Get.snackbar(
+          "Success",
+          "Acknowledgement submitted successfully",
+          snackPosition: SnackPosition.BOTTOM,
+        );
+
+        Get.offAll(() => BottomNavPage());
       });
     } catch (e, stack) {
       print("ERROR OCCURRED → $e");

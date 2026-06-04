@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:blf/app/modules/bottombar/bottom_nav_page.dart';
 import 'package:blf/app/services/home_api.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -57,12 +58,18 @@ class EventsController extends GetxController {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 &&
-          data["status"] == true) {
-        notificationTitle.value = '';
-        notificationDetail.value = '';
-        notificationPushDate.clear();
-        return true;
-      }
+    data["status"] == true) {
+
+  notificationTitle.value = '';
+  notificationDetail.value = '';
+  notificationPushDate.clear();
+
+  Future.delayed(const Duration(milliseconds: 300), () {
+    Get.offAll(() => BottomNavPage());
+  });
+
+  return true;
+}
 
       return false;
     } catch (_) {

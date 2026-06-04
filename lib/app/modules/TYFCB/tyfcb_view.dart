@@ -138,9 +138,9 @@ class TyfcbView extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                controller.selectedPersons.isEmpty
+                controller.selectedPerson.value.isEmpty
                     ? "Select Person"
-                    : controller.selectedPersons.join(", "),
+                    : controller.selectedPerson.value,
                 style: GoogleFonts.kumbhSans(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -264,17 +264,16 @@ class TyfcbView extends StatelessWidget {
                     final name = user['name'].toString();
 
                     return Obx(() {
-                      final isSelected = controller.selectedPersons.contains(
-                        name,
-                      );
+                      final isSelected =
+                          controller.selectedPerson.value == name;
 
                       return GestureDetector(
                         onTap: () {
-                          if (isSelected) {
-                            controller.selectedPersons.remove(name);
-                          } else {
-                            controller.selectedPersons.add(name);
-                          }
+                          controller.selectedPerson.value = name;
+
+                          Future.microtask(() {
+                            Navigator.of(context).pop();
+                          });
                         },
                         child: Container(
                           margin: const EdgeInsets.symmetric(vertical: 6),
@@ -323,13 +322,6 @@ class TyfcbView extends StatelessWidget {
                     });
                   },
                 ),
-              ),
-
-              CustomButton(
-                text: "Done",
-                onTap: () => Future.microtask(() {
-                  Navigator.of(context).pop();
-                }),
               ),
             ],
           ),

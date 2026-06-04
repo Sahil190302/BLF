@@ -106,22 +106,16 @@ class EventsView extends StatelessWidget {
                 text: controller.isLoading.value
                     ? "Submitting..."
                     : "Submit Event",
-                onTap: () {
+                onTap: () async {
                   if (controller.isLoading.value) return;
 
-                  controller.submitEvent().then((success) {
-                    if (!context.mounted) return;
+                  final success = await controller.submitEvent();
 
+                  if (!success && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          success
-                              ? "Event submitted successfully"
-                              : "Failed to submit event",
-                        ),
-                      ),
+                      const SnackBar(content: Text("Failed to submit event")),
                     );
-                  });
+                  }
                 },
               ),
             ),
