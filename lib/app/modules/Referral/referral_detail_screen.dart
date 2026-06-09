@@ -192,11 +192,11 @@ class _ReferralDetailScreenState extends State<ReferralDetailScreen> {
                             referralStatusController,
                           ),
 
+                          _buildInputField("Name", addressController),
+
                           _buildInputField("Email", emailController),
 
                           _buildInputField("Mobile", mobileController),
-
-                          _buildInputField("Address", addressController),
 
                           _buildInputField("Hot Rating", hotRatingController),
 

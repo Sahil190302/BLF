@@ -98,7 +98,10 @@ class TyfcbView extends StatelessWidget {
             const SizedBox(height: 20),
 
             /// SUBMIT BUTTON
-            CustomButton(text: "Submit BAC", onTap: controller.submitTYFCB),
+            CustomButton(
+              text: "Submit BAC",
+              onTap: () => controller.submitTYFCB(context), // Pass context
+            ),
           ],
         ),
       ),
@@ -138,9 +141,9 @@ class TyfcbView extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                controller.selectedPersons.isEmpty
+                controller.selectedPerson.value.isEmpty
                     ? "Select Person"
-                    : controller.selectedPersons.join(", "),
+                    : controller.selectedPerson.value,
                 style: GoogleFonts.kumbhSans(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -237,7 +240,7 @@ class TyfcbView extends StatelessWidget {
               ),
               const SizedBox(height: 15),
               Text(
-                "Select People",
+                "Select Person",
                 style: GoogleFonts.kumbhSans(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -264,17 +267,13 @@ class TyfcbView extends StatelessWidget {
                     final name = user['name'].toString();
 
                     return Obx(() {
-                      final isSelected = controller.selectedPersons.contains(
-                        name,
-                      );
+                      final isSelected =
+                          controller.selectedPerson.value == name;
 
                       return GestureDetector(
                         onTap: () {
-                          if (isSelected) {
-                            controller.selectedPersons.remove(name);
-                          } else {
-                            controller.selectedPersons.add(name);
-                          }
+                          controller.selectedPerson.value = name;
+                          Get.back(); // Close bottom sheet
                         },
                         child: Container(
                           margin: const EdgeInsets.symmetric(vertical: 6),
@@ -323,13 +322,6 @@ class TyfcbView extends StatelessWidget {
                     });
                   },
                 ),
-              ),
-
-              CustomButton(
-                text: "Done",
-                onTap: () => Future.microtask(() {
-                  Navigator.of(context).pop();
-                }),
               ),
             ],
           ),

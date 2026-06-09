@@ -59,9 +59,9 @@ class OutsideReferralView extends StatelessWidget {
             /// REFERRAL STATUS
             _buildLabel("Referral Status"),
             Obx(
-              () => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-
+              () => Wrap(
+                spacing: 12,
+                runSpacing: 10,
                 children: controller.statusList.map((status) {
                   bool selected = controller.selectedStatus.value == status;
 
@@ -74,6 +74,15 @@ class OutsideReferralView extends StatelessWidget {
               ),
             ),
 
+            const SizedBox(height: 20),
+
+            /// NAME
+            _buildLabel("Name"),
+            CustomTextField(
+              hint: "Enter Name",
+              controller: controller.address,
+              icon: Icons.person,
+            ),
             const SizedBox(height: 20),
 
             /// PHONE
@@ -91,16 +100,6 @@ class OutsideReferralView extends StatelessWidget {
               hint: "Enter Email",
               controller: controller.email,
               icon: Icons.email,
-            ),
-            const SizedBox(height: 20),
-
-            /// ADDRESS
-            _buildLabel("Address"),
-            CustomTextField(
-              hint: "Enter Address",
-              controller: controller.address,
-              maxLines: 1,
-              icon: Icons.location_on,
             ),
             const SizedBox(height: 20),
 
@@ -133,7 +132,8 @@ class OutsideReferralView extends StatelessWidget {
             /// CONFIRM BUTTON
             CustomButton(
               text: "Confirm",
-              onTap: controller.submitOutsideReferral,
+              onTap: () =>
+                  controller.submitOutsideReferral(context), // Pass context
             ),
           ],
         ),
@@ -172,16 +172,16 @@ class OutsideReferralView extends StatelessWidget {
                       color: Colors.grey[600],
                     ),
                   ),
-                  Spacer(),
-                  Icon(Icons.search),
+                  const Spacer(),
+                  const Icon(Icons.search),
                 ],
               ),
 
               const SizedBox(height: 4),
               Text(
-                controller.selectedPersons.isEmpty
+                controller.selectedPerson.value.isEmpty
                     ? "Select Person"
-                    : controller.selectedPersons.join(", "),
+                    : controller.selectedPerson.value,
                 style: GoogleFonts.kumbhSans(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -238,29 +238,21 @@ class OutsideReferralView extends StatelessWidget {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: GestureDetector(
-        onTap: onTap,
-
-        child: Container(
-          margin: const EdgeInsets.only(right: 12),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.primaryDark.withOpacity(0.9)
-                : Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.green),
-          ),
-
-          child: Text(
-            label,
-            style: GoogleFonts.kumbhSans(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : AppColors.black,
-            ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primaryDark : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.green),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.kumbhSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : AppColors.black,
           ),
         ),
       ),
@@ -268,15 +260,13 @@ class OutsideReferralView extends StatelessWidget {
   }
 
   void _openPeopleBottomSheet(BuildContext context) {
-    final RxList<String> tempSelected = List<String>.from(
-      controller.selectedPersons,
-    ).obs;
-
     final RxList<Map<String, dynamic>> tempFiltered =
         List<Map<String, dynamic>>.from(controller.users).obs;
 
     final TextEditingController searchCtrl = TextEditingController();
-    final RxBool isProcessing = false.obs;
+
+    searchCtrl.clear();
+    tempFiltered.assignAll(controller.users);
 
     Get.bottomSheet(
       Container(
@@ -288,7 +278,6 @@ class OutsideReferralView extends StatelessWidget {
         ),
         child: Column(
           children: [
-            /// HANDLE
             Container(
               width: 40,
               height: 5,
@@ -300,9 +289,8 @@ class OutsideReferralView extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            /// TITLE
             Text(
-              "Select People",
+              "Select Person",
               style: GoogleFonts.kumbhSans(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -311,7 +299,6 @@ class OutsideReferralView extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            /// SEARCH
             TextField(
               controller: searchCtrl,
               decoration: InputDecoration(
@@ -334,7 +321,6 @@ class OutsideReferralView extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            /// LIST
             Expanded(
               child: Obx(() {
                 if (tempFiltered.isEmpty) {
@@ -347,17 +333,14 @@ class OutsideReferralView extends StatelessWidget {
                     final user = tempFiltered[index];
                     final name = user['name'].toString();
 
-                    final isSelected = tempSelected.contains(name);
                     return Obx(() {
-                      final isSelected = tempSelected.contains(name);
+                      final isSelected =
+                          controller.selectedPerson.value == name;
 
                       return InkWell(
                         onTap: () {
-                          if (isSelected) {
-                            tempSelected.remove(name);
-                          } else {
-                            tempSelected.add(name);
-                          }
+                          controller.selectedPerson.value = name;
+                          Get.back(); // Properly close bottom sheet
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 150),
@@ -371,15 +354,11 @@ class OutsideReferralView extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
-                              AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 150),
-                                child: Icon(
-                                  isSelected
-                                      ? Icons.check_box
-                                      : Icons.check_box_outline_blank,
-                                  key: ValueKey(isSelected),
-                                  color: AppColors.primaryDark,
-                                ),
+                              Icon(
+                                isSelected
+                                    ? Icons.check_circle
+                                    : Icons.radio_button_unchecked,
+                                color: AppColors.primaryDark,
                               ),
                               const SizedBox(width: 10),
                               Expanded(
@@ -399,33 +378,6 @@ class OutsideReferralView extends StatelessWidget {
                   },
                 );
               }),
-            ),
-
-            const SizedBox(height: 10),
-
-            /// DONE BUTTON (FIXED + SAFE)
-            Obx(
-              () => SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: isProcessing.value
-                      ? null
-                      : () {
-                          isProcessing.value = true;
-
-                          controller.selectedPersons.assignAll(tempSelected);
-
-                          Get.back(); // instant close, no microtask
-                        },
-                  child: isProcessing.value
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text("Done"),
-                ),
-              ),
             ),
           ],
         ),
