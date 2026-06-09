@@ -109,7 +109,9 @@ class EventsView extends StatelessWidget {
                 onTap: () async {
                   if (controller.isLoading.value) return;
 
-                  final success = await controller.submitEvent();
+                  final success = await controller.submitEvent(
+                    context,
+                  ); // Pass context
 
                   if (!success && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(

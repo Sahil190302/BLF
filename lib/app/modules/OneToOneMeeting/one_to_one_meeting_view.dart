@@ -33,7 +33,9 @@ class OneToOneMeetingView extends StatelessWidget {
             /// INITIATED BY
             _buildLabel("Initiated By"),
             Obx(
-              () => Row(
+              () => Wrap(
+                spacing: 12,
+                runSpacing: 10,
                 children: controller.initiatedByList.map((option) {
                   bool selected =
                       controller.selectedInitiatedBy.value == option;
@@ -97,23 +99,8 @@ class OneToOneMeetingView extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            /// FOLLOW-UP REMINDER
-            // Obx(
-            //   () => SwitchListTile(
-            //     contentPadding: EdgeInsets.zero,
-            //     title: Text(
-            //       "Set Follow-up Reminder",
-            //       style: GoogleFonts.kumbhSans(fontWeight: FontWeight.w600),
-            //     ),
-            //     value: controller.followUpReminder.value,
-            //     activeColor: AppColors.primaryDark,
-            //     onChanged: (v) => controller.followUpReminder.value = v,
-            //   ),
-            // ),
-            const SizedBox(height: 20),
-
+            /// MEETING IMAGE
             _buildLabel("Meeting Image"),
-
             Obx(() {
               return GestureDetector(
                 onTap: controller.pickImage,
@@ -122,7 +109,10 @@ class OneToOneMeetingView extends StatelessWidget {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.primaryDark),
+                    border: Border.all(
+                      color: AppColors.primaryDark,
+                      width: 1.5,
+                    ),
                   ),
                   child: controller.meetingImage.value == null
                       ? Column(
@@ -147,7 +137,10 @@ class OneToOneMeetingView extends StatelessWidget {
             const SizedBox(height: 30),
 
             /// SUBMIT
-            CustomButton(text: "Submit", onTap: controller.submitMeeting),
+            CustomButton(
+              text: "Submit",
+              onTap: () => controller.submitMeeting(context), // Pass context
+            ),
           ],
         ),
       ),
@@ -189,13 +182,19 @@ class OneToOneMeetingView extends StatelessWidget {
           () => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Met With:",
-                style: GoogleFonts.kumbhSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[600],
-                ),
+              Row(
+                children: [
+                  Text(
+                    "Met With:",
+                    style: GoogleFonts.kumbhSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const Spacer(),
+                  const Icon(Icons.search),
+                ],
               ),
               const SizedBox(height: 4),
               Text(
@@ -256,12 +255,9 @@ class OneToOneMeetingView extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(right: 12),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primaryDark.withOpacity(0.9)
-              : Colors.white,
+          color: isSelected ? AppColors.primaryDark : Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.green),
         ),
@@ -357,8 +353,8 @@ class OneToOneMeetingView extends StatelessWidget {
 
                       return InkWell(
                         onTap: () {
-                          Navigator.of(context).pop();
                           controller.selectedPerson.value = name;
+                          Get.back(); // Properly close bottom sheet
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 150),

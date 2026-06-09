@@ -98,7 +98,10 @@ class TyfcbView extends StatelessWidget {
             const SizedBox(height: 20),
 
             /// SUBMIT BUTTON
-            CustomButton(text: "Submit BAC", onTap: controller.submitTYFCB),
+            CustomButton(
+              text: "Submit BAC",
+              onTap: () => controller.submitTYFCB(context), // Pass context
+            ),
           ],
         ),
       ),
@@ -237,7 +240,7 @@ class TyfcbView extends StatelessWidget {
               ),
               const SizedBox(height: 15),
               Text(
-                "Select People",
+                "Select Person",
                 style: GoogleFonts.kumbhSans(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -270,10 +273,7 @@ class TyfcbView extends StatelessWidget {
                       return GestureDetector(
                         onTap: () {
                           controller.selectedPerson.value = name;
-
-                          Future.microtask(() {
-                            Navigator.of(context).pop();
-                          });
+                          Get.back(); // Close bottom sheet
                         },
                         child: Container(
                           margin: const EdgeInsets.symmetric(vertical: 6),
